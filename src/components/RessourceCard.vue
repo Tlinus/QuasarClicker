@@ -9,7 +9,7 @@
           :inputValue="personsassignToRessource"
           @input="updatePersonsassignToRessource"
           :minValue="0"
-          :maxValue="maxValuePersonsassignToRessource"
+          :maxValue="maxValuePersons"
         ></plus-minus-input>
         <q-btn
           color="green"

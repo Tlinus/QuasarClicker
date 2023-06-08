@@ -103,10 +103,10 @@ export default defineComponent({
 
   setup () {
     const leftDrawerOpen = ref(false)
-
+    
     return {
       essentialLinks: linksList,
-      leftDrawerOpen,
+      leftDrawerOpen : false,
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
       }

@@ -1,128 +1,155 @@
 <template>
   <q-page class="row items-center justify-evenly">
-    <q-btn
-      color="green"
-      label="Produce food"
-      @click="clickerFood"
+    <!-- Buttons and progress bars -->
+    <RessourceCard
+      v-for="resource in resources"
+      :key="resource.name"
+      :resource="resource"
+      :ressourceName="resource.name"
+      :nameOutput="resource.outputName"
+      :calculatedRessource="resource.progress * 100"
+      :persons="persons"
+      :personsassignToRessource="resource.personsassign"
+      :maxValuePersonsassignToRessource="resource.maxValuePersonsassign"
+      :progressRessource="resource.progress"
+      :RessourceOutput="resource.total"
+      @clickAddResource="handleClick(resource )"       @updatePersonsassignToRessource="updatePersonsassignToRessource"
     />
-    <q-btn
-      color="brown"
-      label="Produce wood"
-      @click="clickerWood"
-    />
-
-    <q-linear-progress rounded size="20px" :value="progressFood" color="green"  :instant-feedback="true" class="q-mt-sm" />
-    <q-linear-progress size="25px" :instant-feedback="true"  :value="progressWood" color="brown" class="q-mt-sm" />
-
-    <q-card class="q-mt-sm">
-      <q-card-section class="row justify-center">
-        <span class="text-h6">Food value: {{ Math.round(calculatedFood) }}</span>
-        <span class="text-h6">Persons value: {{ persons }}</span>
-      </q-card-section>
-    </q-card>
-    <q-card class="q-mt-sm">
-      <q-card-section class="row justify-center">
-        <span class="text-h6">Wood value: {{ Math.round(calculatedWood) }}</span>
-        <span class="text-h6">Home value: {{ Home }}</span>
-      </q-card-section>
-    </q-card>
   </q-page>
-
-  <PlusMinusInput
-    :inputValue="personsassignToFood"
-    @input="updatePersonsassignToFood"
-    :minValue="0"
-    :maxValue="maxValuePersonsFood"
-  />
-  <PlusMinusInput
-    :inputValue="personsassignToWood"
-    @input="updatePersonsassignToWood"
-    :minValue="0"
-    :maxValue="maxValuePersonsWood"
-  />
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue';
+import { useQuasar } from 'quasar';
+import RessourceCard from '../components/RessourceCard.vue';
 
-import { defineComponent, ref } from 'vue';
-import PlusMinusInput from '../components/PlusMinusInput.vue';
+interface Resource {
+  name: string;
+  outputName: string;
+  output: object;
+  progress: number;
+  personsassign: number;
+  maxValuePersonsassign: number;
+  total: number;
+
+}
+
 
 export default defineComponent({
   name: 'IndexPage',
+  
+  setup() {
+    const $q = useQuasar();
+    $q.dark.set(true);
+  },
   components: {
-    PlusMinusInput,
+    RessourceCard,
   },
-  data () {
+  data() {
     return {
-      progressFood: 0,
-      progressWood: 0,
       persons: 0,
-      totalFood: 0,
-      totalWood: 0,
-      personsassignToFood: 0,
-      personsassignToWood: 0,
+      personsIdle: 0,
+      totalFood: 100,
+      totalWood: 100,
+      totalStone: 100,
       Home: 0,
-      maxValuePersonsFood: 0,
-      maxValuePersonsWood: 0,
-    }
+
+      resources: {
+        'Food': {
+          name: 'Food',
+          outputName: 'Persons',
+          output: this.persons,
+          progress: 0,
+          personsassign: 0,
+          maxValuePersonsassign: 0,
+          total: 100,
+
+        },
+        'Wood': {
+          name: 'Wood',
+          outputName: 'Home',
+          output: this.Home,
+          progress: 0,
+          personsassign: 0,
+          maxValuePersonsassign: 0,
+          total: 100,
+        },
+        'Stone': {
+          name: 'Stone',
+          outputName: 'Home',
+          output: this.Home,
+          progress: 0,
+          personsassign: 0,
+          maxValuePersonsassign: 0,
+          total: 100,
+        }
+      },
+
+      Buildings: {
+        'Wooden Home': {
+          name: 'Wooden Home',
+          count: 0,
+          cost: {
+            'Wood': 100,
+            'Stone': 0,
+            'Food': 0,
+          },
+        },
+        'Stone Home': {
+          name: 'Stone Home',
+          count: 0,
+          cost: {
+            'Wood': 50,
+            'Stone': 100,
+            'Food': 0,
+          },
+        },
+      },
+      
+
+    };
   },
-  mounted: function () {
+  mounted() {
     window.setInterval(() => {
-      this.progressFood += this.personsassignToFood * 0.001;
-      if(this.progressFood >= 1) {
-        this.progressFood = 0;
-        this.persons += 1;
-        this.totalFood += 100;
-      }
-    }, 1000),
+      this.updateResourceProgress(this.resources['Food']);
+    }, 1000);
+
     window.setInterval(() => {
-      this.progressWood += this.personsassignToWood * 0.001;
-      if(this.progressWood >= 1) {
-        this.progressWood = 0;
-        this.Home += 1;
-        this.totalWood += 100;
-      }
-    }, 1000)
-  },
-  computed: {
-    calculatedFood() {
-      return this.progressFood * 100;
-    },
-    calculatedWood() {
-      return this.progressWood * 100;
-    }
+      this.updateResourceProgress(this.resources['Wood']);
+    }, 1000);
   },
   methods: {
-    clickerFood () {
-      this.progressFood += 0.1;
-      if(this.progressFood >= 1) {
-        this.progressFood = 0;
-        this.totalFood += 100;
-        this.persons += 1;
+    handleClick(resource : Resource) {
+      resource.progress += 0.1;
+      if (resource.progress >= 1) {
+        resource.progress = 0;
+        if (resource.name === 'Food') {
+          this.totalFood += 100;
+          this.persons += 1;
+        } else if (resource.name === 'Wood') {
+          this.totalWood += 100;
+        }
       }
     },
-    clickerWood () {
-      this.progressWood += 0.1;
-      if(this.progressWood >= 1) {
-        this.progressWood = 0;
-        this.totalWood += 100;
-        this.Home += 1;
+    updatePersonsassignToRessource(resource : Resource, personsassignToRessource: number) {
+      resource.personsassign = personsassignToRessource;
+    },
+    updateResourceProgress(resource:Resource) {
+      resource.progress += resource.personsassign * 0.001;
+      if (resource.progress >= 1) {
+        resource.progress = 0;
+        if (resource.name === 'Food') {
+          this.totalFood += 100;
+          this.persons += 1;
+          for (const resource of Object.values(this.resources)) {
+            resource.maxValuePersonsassign += 1;
+          }
+
+        } else if (resource.name === 'Wood') {
+          this.totalWood += 100;
+        }
       }
-    },
-    updatePersonsassignToWood(newValue) {
-      this.personsassignToWood = newValue;
-    },
-    updatePersonsassignToFood(newValue) {
-      this.personsassignToFood = newValue;
     },
   },
-  watch: {
-    persons(newValue) {
-      // Mettre à jour la valeur maximale de food et wood
-      this.maxValuePersonsFood = newValue;
-      this.maxValuePersonsWood = newValue;
-    }
-  }
-  
 });
 </script>

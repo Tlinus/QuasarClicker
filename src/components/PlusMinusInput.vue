@@ -18,7 +18,7 @@
   
   <script>
   export default {
-    name: "PlusMinusInput",
+    name: 'PlusMinusInput',
     props: {
       inputValue: {
         type: Number,
@@ -43,7 +43,7 @@
         this.localValue = newValue;
       },
       localValue(newValue) {
-        this.$emit("input", newValue);
+        this.$emit('input', newValue);
       },
     },
     methods: {
